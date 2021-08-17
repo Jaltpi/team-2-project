@@ -40,16 +40,16 @@ RUN apt-get update \
     jq \
     vim \
     lsb-release 2>&1
-    #
-    # [Optional] For local testing instead of cloud shell
-    # Install Docker CE CLI.
+#
+# [Optional] For local testing instead of cloud shell
+# Install Docker CE CLI.
 RUN curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | apt-key add - 2>/dev/null \
     && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable" \
     && apt-get update \
     && apt-get install -y docker-ce-cli
-    #
-    # Install the AWS CLI tools
-    #
+#
+# Install the AWS CLI tools
+#
 RUN mkdir -p /tmp/aws \
     && cd /tmp/aws \
     && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
@@ -58,39 +58,39 @@ RUN mkdir -p /tmp/aws \
     # Session manager plugin for SSHing etc
     && curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "/tmp/session-manager-plugin.deb" \
     && dpkg -i /tmp/session-manager-plugin.deb
-    #
-    # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
-    #
+#
+# Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
+#
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME
-    #
-    # Starship prompt
-    #
+#
+# Starship prompt
+#
 RUN curl -fsSL https://starship.rs/install.sh | bash -s -- --yes \
     && echo 'eval "$(starship init bash)"' >> /home/$USERNAME/.bashrc
-    #
-    # Add sudo support for the non-root user
-    #
+#
+# Add sudo support for the non-root user
+#
 RUN apt-get install -y sudo \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
     && chmod 0440 /etc/sudoers.d/$USERNAME
-    #
-    # SSH config
-    #
+#
+# SSH config
+#
 RUN mkdir /home/${USERNAME}/.ssh \
     && echo "Host *\n\tIdentitiesOnly=yes\n\tServerAliveInterval=25" > /home/${USERNAME}/.ssh/config \
     && chown 1000:1000 -R /home/${USERNAME}/.ssh/
-    #
-    # Locales
-    #
+#
+# Locales
+#
 RUN apt-get install -y locales \
     && echo "LC_ALL=en_US.UTF-8" >> /etc/environment \
     && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
     && echo "LANG=en_US.UTF-8" > /etc/locale.conf \
     && locale-gen en_US.UTF-8
-    #
-    # Groff needed for AWS CLI
-    #
+#
+# Groff needed for AWS CLI
+#
 RUN curl -sS http://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb http://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get install -y apt-utils groff
@@ -100,11 +100,13 @@ RUN sudo apt-get upgrade -y
 RUN sudo apt-get install python3-venv -y
 RUN sudo apt-get install python3-pip -y
 # Install psycopg2 for the prostgrsql database and dotenv
-RUN pip3 install psycopg2-binary
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc \
+    && pip3 install psycopg2
 RUN pip3 install python-dotenv
-    #
-    # Clean up
-    #
+#
+# Clean up
+#
 RUN apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
