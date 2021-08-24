@@ -1,62 +1,7 @@
 import pandas as pd
-
-# column_names = ["DateTime", "Location", "Customer_Name",
-#                 "Order", "Payment_Method", "Total_Price", "PII"]
-# df = pd.read_csv("2021-02-23-isle-of-wight.csv", names=column_names)
+from Extract import extract_csv_via_pandas
 
 
-# for value in df["PII"]:
-#     if value == "None":
-#         value += ","
-
-# df[['Payment_type', 'Account_number']
-#    ] = df.PII.str.split(",", expand=True,)  # Split payment into type and account number
-
-# for value in df["PII"]:
-#     value = value[0:-1]
-
-# df[['Date', 'Timestamp']  # Split DateTime into Date and Timestamp
-#    ] = df.DateTime.str.split(" ", expand=True,)
-
-# locations = df["Location"]  # Stores column of location
-# orders = df["Order"]  # stores column of orders
-# total_prices = df["Total_Price"]  # store total prices
-# to_drop = ["Customer_Name", "DateTime",
-#            "Account_number"]  # Data to sanitize
-
-# # inplace whether the returned data is copied(False) or updated(True)
-# delete_data = df.drop(columns=to_drop, inplace=False)
-
-
-#########################
-# Quick test to insert values into empty csv spaces
-
-# orders = df["Order"]
-
-# new_orders = []
-
-# indexes = []
-# for order in orders:
-#     # print(order)
-#     indexes.append(order.split(","))
-
-
-# # print(indexes)
-
-# for place, item in enumerate(indexes):
-#     if item == "":
-#         indexes[place] = "Regular"
-# new_orders.append(indexes)
-# # print(new_orders)
-
-
-# print(f"new {indexes}")
-
-# print(len(indexes))
-
-# print(new_orders)
-# product_dict = {"Product_ID" : range(1, len(new_orders[0]), "Product_name" : new_order)}
-######################################################################
 def isfloat(value):
     """This function checks the value to see if it can be casted as a float. It returns True if it is a float,
     and returns False if otherwise."""
@@ -67,38 +12,41 @@ def isfloat(value):
         return False
 
 
-column_names = ["Time", "Location", "Customer Name",
+def get_unique_items(List: list):
+    """This function takes in a list, and gets the unique items from the inputted list, then returns
+    the unique items in the form of a list."""
+    temporary_list = []
+    for item in List:
+        if item not in temporary_list:
+            temporary_list.append(item)
+
+    return temporary_list
+
+
+column_names = ["DateTime", "Location", "Customer Name",
                 "Order", "Payment_Method", "Total_Price", "PII"]
 
 df = pd.read_csv("2021-02-23-isle-of-wight.csv", names=column_names)
 
 
-df[['Date', 'Timestamp']  # Split DateTime into Date and Timestamp
-   ] = df.Time.str.split(" ", expand=True,)
+df[['Date', 'Time']  # Split DateTime into Date and Timestamp
+   ] = df.DateTime.str.split(" ", expand=True,)
 
+df[['Payment_type', 'Account_number']
+
+   ] = df.PII.str.split(",", expand=True,)  # Split payment info into card names and card numbers
+
+to_drop = ["Customer_Name", "PII"]  # Data to sanitize
+
+card_used = df["Payment_type"]  # Debit/Credit card names
 original_date = df["Date"]
-original_time = df["Timestamp"]
+original_time = df["Time"]
 original_location = df["Location"]
-original_total_price = df["Total_Price"]
-original_payment_method = df["Payment_Method"]
-
-# order_table_df = pd.DataFrame()
-# order_table_df["Date"] = original_date
-# order_table_df["Time"] = original_time
-# order_table_df["Location"] = original_location
-# order_table_df["Order"] = unique_order_ID
-# order_table_df["Total_price"] = original_total_price
-# order_table_df["Payment_method"] = original_payment_method
-
-# print(order_table_df)
-
-
+original_total_price = df["Total_Price"]  # Final Price
+original_payment_method = df["Payment_Method"]  # options: Cash or Card
 original_orders = df["Order"]
-new_orders = []
-size = []
-product_name = []
-product_price = []
 
+new_orders = []
 for order in original_orders:
     indexes = order.split(",")  # Splits original order
 
@@ -110,9 +58,13 @@ for order in original_orders:
     x = ",".join(indexes)  # rejoin modified orders
     new_orders.append(x)
 
+# Order ID keeps track of every ID each customer makes per basket item
 order_ID = []
-unique_order_ID = []
+size = []
+product_name = []
+product_price = []
 
+# Splits new orders and separates info into Size, Product Name, and Product price
 for i in range(len(new_orders)):
     words = new_orders[i].split(",")
     for word in words:
@@ -127,32 +79,56 @@ for i in range(len(new_orders)):
         else:
             product_name.append(word)
 
+# Get Unique ID out of entire list of order ID's
+unique_order_ID = []
 for item in order_ID:
     if item not in unique_order_ID:
         unique_order_ID.append(item)
 
+
+# Creating a list of tuples containing Orders' Id, size of product, product name, product price that was ordered
 zipped_values_orders = zip(order_ID, size, product_name, product_price)
 zipped_list_orders = list(zipped_values_orders)
 
+# Gets Unique orders out of list containing all orders
 unique_orders = []
-
-# for products table
 for item in zipped_list_orders:
     if item not in unique_orders:
         unique_orders.append(item)
 
-# making product df
+
+# Creating a list of tuples containing all product's size, name, price that was ordered
 unzipped_order_ID, unzipped_size, unzipped_name, unzipped_price = zip(
     *unique_orders)
-product_df = pd.DataFrame()
-product_df["product_size"] = unzipped_size
-product_df["product_name"] = unzipped_name
-product_df["product_price"] = unzipped_price
+zipped_values_products = zip(size, product_name, product_price)
+zipped_list_products = list(zipped_values_products)
 
-# dropped_product_df = product_df.drop_duplicates(
-#     subset=["product_name", "product_size", "product_price"])
-# dropped_product_df["product_ID"] = range(
-#     1, (len(dropped_product_df["product_name"]) + 1))  # Error at 147
+# Get Unique Products (Size, Product, Price)
+unique_product_info = []
+for item in zipped_list_products:
+    if item not in unique_product_info:
+        unique_product_info.append(item)
+
+# Get Unique Credit/Debit Cards
+unique_cards = []
+for place, item in enumerate(card_used):
+    if item == "None":
+        item = "Cash"
+    if item not in unique_cards:
+        unique_cards.append(item)
+
+# Get ID for Unique cards
+unique_cards_ID = []
+for i in range(1, len(unique_cards)+1):
+    unique_cards_ID.append(i)
+
+# Gets unique Payment method
+unique_payment_method = []
+for item in original_payment_method:
+    if item not in unique_payment_method:
+        unique_payment_method.append(item)
+
+##################### USE PostgreSQL to make order-products table #####################################
 
 # for order_product table
 # all_product_ID_in_order = []
@@ -169,59 +145,60 @@ product_df["product_price"] = unzipped_price
 # order_product_df["order_ID"] = order_ID
 # order_product_df["product_ID"] = all_product_ID_in_order
 
-# Making Order Table
+
+# print(order_product_df.head(10))
+
+
+################################ Making Order df ######################################################
+
 order_table_df = pd.DataFrame()
 order_table_df["Date"] = original_date
 order_table_df["Time"] = original_time
 order_table_df["Location"] = original_location
-order_table_df["Order"] = unique_order_ID
+# order_table_df["Order"] = unique_order_ID
 order_table_df["Total_price"] = original_total_price
-order_table_df["Payment_method"] = original_payment_method
 
 print(order_table_df)
+################################# Making Products df ###############################################
+
+product_df = pd.DataFrame()
+product_df["Product_size"] = unzipped_size
+product_df["Product_name"] = unzipped_name
+product_df["Product_price"] = unzipped_price
+cleaned_products_df = product_df.drop_duplicates(
+    subset=["Product_name", "Product_size", "Product_price"], ignore_index=True)  # Removes all duplicates
+# cleaned_products_df["product_ID"] = range(1, (len(unique_product_info)+1)) #Agreed to ignore adding indexes, SQL will AutoIncrement the entry
+
+print(cleaned_products_df)
+####################################### Making payments df ############################################
+
+# Team Decision in Progress:
+# Make a column containing specific cards used for payment or\
+# leave payment as either Cash or Card
+
+unique_payment_method = []
+for item in original_payment_method:
+    if item not in unique_payment_method:
+        unique_payment_method.append(item)
 
 
-# print(order_product_df.head(10))
+payments_df = pd.DataFrame()
+#payments_df["Payment Type"] = original_payment_method
+# payments_df["Card_ID"] = unique_cards_ID #Agreed to ignore adding indexes, SQL will AutoIncrement the entry
+payments_df["Payment Type"] = unique_payment_method
 
-# making orders df
-# order id has 1552 items
-# date has 540
-# time has 540
-# location 540
-# Total spend 540
+print(payments_df)
 
 
-# making payments df
-# payment id
-# payment type
+############################################## MAKING OF CARD TYPES df ################################################################
 
-# print(order_product_df)
-# print(product_df)
+unique_card_used = []
+for item in card_used:
+    if item not in unique_card_used:
+        unique_card_used.append(item)
 
-# order_ID, size, product_name, product_price = list(zip(*zipped_list_orders))
+card_type_df = pd.DataFrame()
+card_type_df["Types_of_Card"] = unique_card_used
 
-# zipped_values_products = zip(size, product_name, product_price)
-# zipped_list_products = list(zipped_values_products)
-
-# product_info = []
-# for item in zipped_list_products:
-#     if item not in product_info:
-#         product_info.append(item)
-
-
-# print(f"This is the length of the order ID list: {len(order_ID)}")
-# print(f"This is the length of the size list: {len(size)}")
-# print(f"This is the length of the product name list: {len(product_name)}")
-# print(f"This is the length of the product price list: {len(product_price)}")
-# print(
-#     f"This is the length of the unique orders (This includes order_id, size, name, price): {len(unique_orders)}")
-# print(
-#     f"This is the length of the product_info (This includes size, name, price): {len(product_info)}")
-# print(product_info)
-# print(unique_orders)
-
-# for item in unique_orders:
-#     print(item)
-
-# original order ["", "Tea", "2.50", ",", "Coffee", "3.0", "Large", "Smoothie", "1.50"]
-# new order ["Regular", "Tea", "2.50", "Regular", "Coffee", "3.0", "Large", "Smoothie", "1.50"]
+print(card_type_df)
+#####################################################################################################################################
