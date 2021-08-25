@@ -3,7 +3,7 @@ from config import config
 
 
 def create_tables():
-    
+
     commands = (
         """CREATE TABLE Payment(
                 Payment_ID INT PRIMARY KEY NOT NULL,
@@ -15,7 +15,7 @@ def create_tables():
             Order_Date DATE,
             Order_Time Time,
             Order_Location Varchar (255),
-            Total_Spendature INT NOT NULL,
+            Total_Spendature REAL NOT NULL,
             Payment_ID INT,
             FOREIGN KEY (Payment_ID) REFERENCES Payment (Payment_ID)
         )
@@ -23,12 +23,14 @@ def create_tables():
         """ CREATE TABLE IF NOT EXISTS Products (
                 Product_ID SERIAL PRIMARY KEY,
                 Product_Name VARCHAR(255) NOT NULL,
+                Product_Size VARCHAR(255) NOT NULL,
                 Product_Price REAL
                 )
         """,
         """CREATE TABLE IF NOT EXISTS Order_Product(
                 Order_ID INT,
-                Product_ID INT,                
+                Product_ID INT,
+                Quantity INT NOT NULL,                
                 FOREIGN KEY (Order_id)
                 REFERENCES Orders (Order_ID),
                 FOREIGN KEY (Product_ID)
