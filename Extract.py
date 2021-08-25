@@ -1,9 +1,12 @@
 import pandas as pd
 
 
-def extract_csv(file_name):
-    df = pd.read_csv(file_name)
+def extract_csv_via_pandas(file_name, column_names: list):
+    df = pd.read_csv(file_name, names=column_names)
     print(df)
     return df
 
-extract_csv('2021-02-23-isle-of-wight.csv')
+
+column = ["DateTime", "Location", "Customer",
+          "Order", "Payment_method", "Final_price", "PII"]
+extract_csv_via_pandas('2021-02-23-isle-of-wight.csv', column)
