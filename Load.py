@@ -20,7 +20,7 @@ from sqlalchemy import create_engine
 
 
 # Pandas DataFrame Orders -> SQL
-# order_table_df.to_sql("Orders", engine, if_exists = "replace")
+# order_table_df.to_sql("Orders", engine, if_exists = "replace", dtype = {Total_Spent: float64})
 
 # Pandas DataFrame Products -> SQL
 # cleaned_product_df.to_sql("Products", engine, if_exists ="replace", dtype = {"Product_price": float64})
