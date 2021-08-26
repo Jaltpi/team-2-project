@@ -1,7 +1,8 @@
 import pandas as pd
+import numpy as np
 from Extract import extract_csv_via_pandas
 from config import config
-from Load import create_connection, pandas_to_sql
+from Load import create_connection, pandas_to_sql, SQL_commands_executor, SQL_INSERT_STATEMENT_FROM_DATAFRAME
 import psycopg2
 from sqlalchemy import create_engine
 
@@ -30,7 +31,8 @@ def get_unique_items(List: list):
 column_names = ["DateTime", "Location", "Customer Name",
                 "Order", "Payment_Method", "Total_Price", "PII"]
 
-df = pd.read_csv("2021-02-23-isle-of-wight.csv", names=column_names)
+df = pd.read_csv("2021-02-23-isle-of-wight.csv",
+                 names=column_names)
 
 
 df[['Date', 'Time']  # Split DateTime into Date and Timestamp
@@ -57,7 +59,7 @@ for order in original_orders:
     # Loops through list to find empty spaces and fill them with string "Regular"
     for place, item in enumerate(indexes):
         if item == "":
-            indexes[place] = "Regular"
+            indexes[place] = "None"
 
     x = ",".join(indexes)  # rejoin modified orders
     new_orders.append(x)
@@ -72,7 +74,7 @@ product_price = []
 for i in range(len(new_orders)):
     words = new_orders[i].split(",")
     for word in words:
-        if word == "Regular" or word == "Large":
+        if word == "Regular" or word == "Large" or word == "None":
             size.append(word)
             # Keeps track of each new basket item in the order
             repeat_order_ID.append(i+1)
@@ -116,17 +118,15 @@ zipped_list_products = list(zipped_values_products)
 # Get Unique Credit/Debit Cards
 unique_cards = []
 for place, item in enumerate(card_used):
-    if item == "None":
-        item = "Cash"
     if item not in unique_cards:
         unique_cards.append(item)
 
-# Get ID for Unique cards
+# Get ID for Unique cards (Visa, express, etc)
 unique_cards_ID = []
 for i in range(1, len(unique_cards)+1):
     unique_cards_ID.append(i)
 
-# Gets unique Payment method
+# Gets unique Payment method Cash/card
 unique_payment_method = []
 for item in original_payment_method:
     if item not in unique_payment_method:
@@ -153,16 +153,15 @@ def order_table():
 # Function
 def product_table():
     product_df = pd.DataFrame()
-    product_df["Product_name"] = unzipped_name
-    product_df["Product_size"] = unzipped_size
-    product_df["Product_price"] = unzipped_price
+    product_df["product_name"] = unzipped_name
+    product_df["product_size"] = unzipped_size
+    product_df["product_price"] = unzipped_price
     cleaned_products_df = product_df.drop_duplicates(
-        subset=["Product_name", "Product_size", "Product_price"], ignore_index=True)
-    cleaned_products_df["Product_ID"] = range(
-        1, len(cleaned_products_df["Product_size"] + 1))
+        subset=["product_name", "product_size", "product_price"], ignore_index=True)
+    cleaned_products_df["product_ID"] = range(
+        1, len(cleaned_products_df["product_size"]) + 1)
     # Removes all duplicates
-    # cleaned_products_df["product_ID"] = range(1, (len(unique_product_info)+1)) #Agreed to ignore adding indexes, SQL will AutoIncrement the entry
-
+    # Agreed to ignore adding indexes, SQL will AutoIncrement the entry
     return(cleaned_products_df)
 
 # making order_product table with quantity
@@ -176,15 +175,16 @@ def order_product_table():
     temp_df["product_name"] = product_name
     temp_df["product_price"] = product_price
 
-    product_df = product_table()
-    # add product id to temp_df, WHERE product_df size,name,price == temp_df size,name,price
-    # drop temp_df's size_name_price Columns
+    # PRODUCT IDS ARE FLOATS AND WEIRD WARNING MESSAGE WHEN ASSIGNING PRODUCT IDS
 
-    # changed quantity from "product_size", "product_name", "product_price"]
+    product_df = product_table()
+    temp_df = temp_df.merge(product_df, on=["product_size",
+                                            "product_name", "product_price"], how="left")
     temp_df = temp_df.groupby(
         ["repeat_Order_ID", "product_ID"], axis=0).size().reset_index(name='quantity')
     order_product_df = temp_df.drop_duplicates()
     return order_product_df
+
 ####################################### Making payments df ########################################################################################################
 
 # Team Decision in Progress:
@@ -202,10 +202,11 @@ def order_product_table():
 def payments_type():
     payments_df = pd.DataFrame()
     # payments_df["Payment Type"] = original_payment_method
-    # payments_df["Card_ID"] = unique_cards_ID #Agreed to ignore adding indexes, SQL will AutoIncrement the entry
+    # Agreed to ignore adding indexes, SQL will AutoIncrement the entry
+    payments_df["Payment_ID"] = range(1, len(unique_payment_method) + 1)
     payments_df["Payment Type"] = unique_payment_method
 
-    return(payments_df)
+    return payments_df
 
 
 ############################################## MAKING OF CARD TYPES df ###########################################################################################
@@ -215,11 +216,17 @@ for item in card_used:
     if item not in unique_card_used:
         unique_card_used.append(item)
 
-card_type_df = pd.DataFrame()
-card_type_df["Types_of_Card"] = unique_card_used
+
+def card_type():
+    card_type_df = pd.DataFrame()
+    card_type_df["Card_ID"] = unique_cards_ID
+    card_type_df["Types_of_Card"] = unique_card_used
+
+    return card_type_df
 
 # print(card_type_df)
 #####################################################################################################################################
+
 
 # Environment Variables
 db = config()
@@ -232,13 +239,34 @@ database = db["database"]
 engine = create_connection(system="postgresql", user_name=user, password=password, host=host,
                            port="5432", database_name=database)
 
+
 cleaned_product_df = product_table()
 order_table_df = order_table()
 payments_df = payments_type()
 order_product_df = order_product_table()
+card_type_df = card_type()
+# print(order_product_df.tail())
+# print(cleaned_product_df.head())
+# card_type()
+# payments_type()
 
 # LOAD
-pandas_to_sql(cleaned_product_df, "Products", engine)
-pandas_to_sql(order_table, "Orders", engine)
-pandas_to_sql(payments_df, "Payments", engine)
-pandas_to_sql(order_product_df, "Order_Product", engine)
+# pandas_to_sql(cleaned_product_df, "products", engine,
+#               if_exists="append")
+# pandas_to_sql(order_table_df, "orders", engine, if_exists="append")
+# pandas_to_sql(payments_df, "payment", engine, if_exists="append")
+# pandas_to_sql(order_product_df, "order_product", engine, if_exists="append")
+# pandas_to_sql(card_type_df, 'card_type', engine, if_exists="append")
+
+products_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
+    cleaned_product_df, "products")
+
+SQL_commands_executor(products_insert_commands)
+
+# cleaned_product_df_dict = dict(cleaned_product_df.to_dict())
+# order_table_df_dict = dict(order_table_df.to_dict())
+# payments_df_dict = dict(payments_df.to_dict())
+# order_product_df_dict = dict(order_product_df.to_dict())
+# card_type_df_dict = dict(card_type_df.to_dict())
+
+# print(cleaned_product_df_dict)

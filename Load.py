@@ -1,8 +1,9 @@
 import psycopg2
 from sqlalchemy import create_engine
+from config import config
 
 
-#TODO = ["Create database", "Create tables in database", "Upload data into tables"]
+# TODO = ["Create database", "Create tables in database", "Upload data into tables"]
 
 
 # Use Pandas -> SQL
@@ -29,7 +30,7 @@ from sqlalchemy import create_engine
 # Pandas DataFrame Payment -> SQl
 # payments_df.to_sql("Payments", engine, if_exists ="replace")
 
-def pandas_to_sql(dataframe: object, table_name: str, connection, schema=None, if_exists="replace", index=True, index_label=None, chunksize=None, dtype=None, method=None):
+def pandas_to_sql(dataframe: object, table_name: str, connection, schema=None, if_exists="replace", index=False, index_label=None, chunksize=None, dtype=None, method=None):
     """"This function allows the user to take a dataframe and moves its data into a SQL database"""
     try:
         dataframe.to_sql(table_name, connection, schema,
@@ -55,3 +56,33 @@ def create_connection(system: str, user_name: str, password: str, host: str, por
     else:
         print("Successful connection to database established.")
         return engine
+
+
+def SQL_INSERT_STATEMENT_FROM_DATAFRAME(SOURCE, TARGET):
+    sql_texts = []
+    for index, row in SOURCE.iterrows():
+        sql_texts.append('INSERT INTO '+TARGET+' (' +
+                         str(', '.join(SOURCE.columns)) + ') VALUES ' + str(tuple(row.values)))
+    return sql_texts
+
+
+def SQL_commands_executor(commands: list):
+    conn = None
+    try:
+        # read the connection parameters
+        params = config()
+        # connect to the PostgreSQL server
+        conn = psycopg2.connect(**params)
+        cur = conn.cursor()
+        # create command one by one
+        for command in commands:
+            cur.execute(command)
+        # close communication with the PostgreSQL database server
+        cur.close()
+        # commit the changes
+        conn.commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
