@@ -3,7 +3,6 @@ import pandas as pd
 
 def extract_csv_via_pandas(file_name, column_names: list):
     df = pd.read_csv(file_name, names=column_names)
-    print(df)
     return df
 
 
