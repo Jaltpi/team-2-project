@@ -65,7 +65,7 @@ for order in original_orders:
     new_orders.append(x)
 
 # Order ID keeps track of every ID each customer makes per basket item
-repeat_order_ID = []
+Customer_ID = []
 size = []
 product_name = []
 product_price = []
@@ -77,7 +77,7 @@ for i in range(len(new_orders)):
         if word == "Regular" or word == "Large" or word == "None":
             size.append(word)
             # Keeps track of each new basket item in the order
-            repeat_order_ID.append(i+1)
+            Customer_ID.append(i+1)
 
         elif isfloat(word) == True:
             product_price.append(float(word))
@@ -87,13 +87,13 @@ for i in range(len(new_orders)):
 
 # Get Unique ID out of entire list of order ID's
 unique_order_ID = []
-for item in repeat_order_ID:
+for item in Customer_ID:
     if item not in unique_order_ID:
         unique_order_ID.append(item)
 
 
 # Creating a list of tuples containing Orders' Id, size of product, product name, product price that was ordered
-zipped_values_orders = zip(repeat_order_ID, size, product_name, product_price)
+zipped_values_orders = zip(Customer_ID, size, product_name, product_price)
 zipped_list_orders = list(zipped_values_orders)
 
 # Gets Unique orders out of list containing all orders
@@ -145,7 +145,7 @@ def order_table():
     order_table_df["Location"] = original_location
     # order_table_df["Order"] = unique_order_ID
     order_table_df["Total_price"] = original_total_price
-    order_product_df["payment_type"] = df["Payment_Method"]
+    order_table_df["payment_type"] = df["Payment_Method"]
 
     return(order_table_df)
 ################################# Making Products df ####################################################################################################
@@ -171,7 +171,7 @@ def product_table():
 def order_product_table():
 
     temp_df = pd.DataFrame()
-    temp_df["repeat_Order_ID"] = repeat_order_ID
+    temp_df["Customer_ID"] = Customer_ID
     temp_df["product_size"] = size
     temp_df["product_name"] = product_name
     temp_df["product_price"] = product_price
@@ -182,7 +182,7 @@ def order_product_table():
     temp_df = temp_df.merge(product_df, on=["product_size",
                                             "product_name", "product_price"], how="left")
     temp_df = temp_df.groupby(
-        ["repeat_Order_ID", "product_ID"], axis=0).size().reset_index(name='quantity')
+        ["Customer_ID", "product_ID"], axis=0).size().reset_index(name='quantity')
     order_product_df = temp_df.drop_duplicates()
     return order_product_df
 
@@ -200,30 +200,30 @@ def order_product_table():
 
 
 # Function
-def payments_type():
-    payments_df = pd.DataFrame()
-    # payments_df["Payment Type"] = original_payment_method
-    # Agreed to ignore adding indexes, SQL will AutoIncrement the entry
-    payments_df["Payment_ID"] = range(1, len(unique_payment_method) + 1)
-    payments_df["Payment_Type"] = unique_payment_method
+# def payments_type():
+#     payments_df = pd.DataFrame()
+#     # payments_df["Payment Type"] = original_payment_method
+#     # Agreed to ignore adding indexes, SQL will AutoIncrement the entry
+#     payments_df["Payment_ID"] = range(1, len(unique_payment_method) + 1)
+#     payments_df["Payment_Type"] = unique_payment_method
 
-    return payments_df
+#     return payments_df
 
 
 ############################################## MAKING OF CARD TYPES df ###########################################################################################
 
-unique_card_used = []
-for item in card_used:
-    if item not in unique_card_used:
-        unique_card_used.append(item)
+# unique_card_used = []
+# for item in card_used:
+#     if item not in unique_card_used:
+#         unique_card_used.append(item)
 
 
-def card_type():
-    card_type_df = pd.DataFrame()
-    card_type_df["Card_ID"] = unique_cards_ID
-    card_type_df["Types_of_Card"] = unique_card_used
+# def card_type():
+#     card_type_df = pd.DataFrame()
+#     card_type_df["Card_ID"] = unique_cards_ID
+#     card_type_df["Card_type"] = unique_card_used
 
-    return card_type_df
+#     return card_type_df
 
 # print(card_type_df)
 #####################################################################################################################################
@@ -243,9 +243,9 @@ engine = create_connection(system="postgresql", user_name=user, password=passwor
 
 cleaned_product_df = product_table()
 order_table_df = order_table()
-payments_df = payments_type()
+# payments_df = payments_type()
 order_product_df = order_product_table()
-card_type_df = card_type()
+#card_type_df = card_type()
 # print(order_product_df.tail())
 # print(cleaned_product_df.head())
 # card_type()
@@ -262,7 +262,17 @@ card_type_df = card_type()
 products_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
     cleaned_product_df, "products")
 
+products_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
+    cleaned_product_df, "products")
+orders_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
+    order_table_df, "orders")
+order_product_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
+    order_product_df, "order_product")
+
+
 SQL_commands_executor(products_insert_commands)
+SQL_commands_executor(orders_insert_commands)
+SQL_commands_executor(order_product_insert_commands)
 
 # cleaned_product_df_dict = dict(cleaned_product_df.to_dict())
 # order_table_df_dict = dict(order_table_df.to_dict())

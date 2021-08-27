@@ -24,19 +24,13 @@ def create_database(user, password, host, port):
 def create_tables():
 
     commands = (
-        """CREATE TABLE IF NOT EXISTS Payment(
-                Payment_ID SERIAL PRIMARY KEY NOT NULL,
-                Payment_Type VARCHAR(255)
-        )
-        """,
         """CREATE TABLE IF NOT EXISTS Orders(
             Customer_ID SERIAL PRIMARY KEY,
             Date VARCHAR(255),
             Time VARCHAR(255),
             Location VARCHAR(255),
             Total_price REAL,
-            Payment_ID INT,
-            FOREIGN KEY(Payment_ID) REFERENCES Payment(Payment_ID)
+            Payment_Type VARCHAR(255)
         )
         """,
         """ CREATE TABLE IF NOT EXISTS Products(
@@ -55,12 +49,6 @@ def create_tables():
                 REFERENCES Orders(Customer_ID),
                 FOREIGN KEY(Product_ID)
                 REFERENCES Products(Product_ID)
-
-        )
-        """,
-        """CREATE TABLE IF NOT EXISTS Card_Type(
-            Card_ID SERIAL PRIMARY KEY,
-            Card_Type VARCHAR(255)
         )
         """)
     conn = None
