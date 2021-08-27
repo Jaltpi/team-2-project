@@ -1,0 +1,25 @@
+service: team-2-ETL
+
+frameworkVersion: "2"
+
+provider:
+  region: eu-west-1
+  iam:
+    role:
+      permissionsBoundary: arn:aws:iam::883232869702:policy/ScopePermissions
+  name: aws
+  runtime: python3.8
+  lambdaHashingVersion: 20201221
+
+functions:
+  hello:
+    handler: handler.hello
+
+package:
+  include:
+    - src/**
+  exclude:
+    - "*"
+    - "*/**"
+  individually: true
+  excludeDevDependencies: false

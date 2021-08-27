@@ -145,6 +145,7 @@ def order_table():
     order_table_df["Location"] = original_location
     # order_table_df["Order"] = unique_order_ID
     order_table_df["Total_price"] = original_total_price
+    order_product_df["payment_type"] = df["Payment_Method"]
 
     return(order_table_df)
 ################################# Making Products df ####################################################################################################
@@ -204,7 +205,7 @@ def payments_type():
     # payments_df["Payment Type"] = original_payment_method
     # Agreed to ignore adding indexes, SQL will AutoIncrement the entry
     payments_df["Payment_ID"] = range(1, len(unique_payment_method) + 1)
-    payments_df["Payment Type"] = unique_payment_method
+    payments_df["Payment_Type"] = unique_payment_method
 
     return payments_df
 
