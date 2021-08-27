@@ -261,9 +261,6 @@ order_product_df = order_product_table()
 
 products_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
     cleaned_product_df, "products")
-
-products_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
-    cleaned_product_df, "products")
 orders_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
     order_table_df, "orders")
 order_product_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
