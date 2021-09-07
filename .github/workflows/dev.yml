@@ -22,7 +22,7 @@ jobs:
       - run: npm ci
 
       - name: serverless-team-2
-        uses: serverless/github-action@v1
+        uses: serverless/github-action@master
         with:
           args: deploy
         env:

@@ -1,6 +1,6 @@
 service: team-2-ETL
 
-frameworkVersion: ">=1.2.0 <2.0.0"
+frameworkVersion: "2"
 
 provider:
   region: eu-west-1
@@ -13,7 +13,6 @@ provider:
 
 plugins:
   - serverless-python-requirements
-
 custom:
   pythonRequirements:
     slim: true
