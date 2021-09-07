@@ -1,4 +1,14 @@
-name: CI/CD
+# Github Actions for Serverless Framework
+#
+# Create AWS_KEY and AWS_SECRET secrets in Github repository settings
+# If you're using env.yml file, store its content as ENV Github secret
+#
+# Master branch will be deployed as DEV and every new tag starting with "v**" (e.g. v1.0, v1.2, v2.0, etc) will be deployed as PROD
+#
+# Learn more: https://maxkostinevich.com/blog/how-to-deploy-serverless-applications-using-github-actions/
+#
+
+name: CI/CD Serverless Deploy
 
 on:
   push:
@@ -6,32 +16,37 @@ on:
       - dev
 
 jobs:
-  deploy:
+  deploy-dev:
     name: deploy
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: "14.17.5"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - name: Use Node
+      - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
 
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.8"
-          architecture: "x64"
-      - run: pip3 install pandas psycopg2
+      - name: Install Serverless Framework
+        run: npm install -g serverless
 
-      - name: serverless-team-2
-        uses: serverless/github-action@master
-        with:
-          args: deploy
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Serverless AWS authentication
+        run: sls config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     - name: Create env file
+      #       run: | # cp sample.env.yml env.yml
+      #         cat > env.yml << EOF
+      #         ${{ secrets.ENV }}
+      #         EOF
+      - name: Install NPM dependencies
+        run: npm install
+      # Optional
+      #- name: Build assets
+      #  run: npm run assets-dev
+      - name: Deploy Lambda functions
+        run: SLS_DEBUG=1 sls deploy #-s dev
+    # Optional (to use with serverless-finch serverless plugin)
+    #- name: Deploy assets to S3
+    #  run: sls client deploy --no-delete-contents --no-confirm -s dev
