@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: "3.8"
           architecture: "x64"
-      - run: pip3 install pandas pyscopg2
+      - run: pip3 install pandas psycopg2
 
       - name: serverless-team-2
         uses: serverless/github-action@master
