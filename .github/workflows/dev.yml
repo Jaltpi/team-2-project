@@ -21,6 +21,13 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
 
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+          architecture: "x64"
+      - run: python my_script.py
+
       - name: serverless-team-2
         uses: serverless/github-action@master
         with:
