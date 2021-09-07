@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
-from Extract import extract_csv_via_pandas
 from config import config
-from Load import create_connection, pandas_to_sql, SQL_commands_executor, SQL_INSERT_STATEMENT_FROM_DATAFRAME
+from Load import create_connection, SQL_commands_executor, SQL_INSERT_STATEMENT_FROM_DATAFRAME
 import psycopg2
 from sqlalchemy import create_engine
 
@@ -109,11 +108,6 @@ unzipped_order_ID, unzipped_size, unzipped_name, unzipped_price = zip(
 zipped_values_products = zip(size, product_name, product_price)
 zipped_list_products = list(zipped_values_products)
 
-# Get Unique Products (Size, Product, Price)
-# unique_product_info = []
-# for item in zipped_list_products:
-#     if item not in unique_product_info:
-#         unique_product_info.append(item)
 
 # Get Unique Credit/Debit Cards
 unique_cards = []
@@ -132,8 +126,6 @@ for item in original_payment_method:
     if item not in unique_payment_method:
         unique_payment_method.append(item)
 
-##################### USE PostgreSQL to make order-products table ####################################################################################
-
 
 ################################ Making Order df ######################################################################################################
 
@@ -148,10 +140,12 @@ def order_table():
     order_table_df["payment_type"] = df["Payment_Method"]
 
     return(order_table_df)
+
 ################################# Making Products df ####################################################################################################
 
-
 # Function
+
+
 def product_table():
     product_df = pd.DataFrame()
     product_df["product_name"] = unzipped_name
@@ -166,6 +160,10 @@ def product_table():
     return(cleaned_products_df)
 
 # making order_product table with quantity
+
+################################# Making Order Products df ####################################################################################################
+
+# Function
 
 
 def order_product_table():
@@ -186,47 +184,7 @@ def order_product_table():
     order_product_df = temp_df.drop_duplicates()
     return order_product_df
 
-####################################### Making payments df ########################################################################################################
-
-# Team Decision in Progress:
-# Make a column containing specific cards used for payment or\
-# leave payment as either Cash or Card
-
-
-# unique_payment_method = []
-# for item in original_payment_method:
-#     if item not in unique_payment_method:
-#         unique_payment_method.append(item)
-
-
-# Function
-# def payments_type():
-#     payments_df = pd.DataFrame()
-#     # payments_df["Payment Type"] = original_payment_method
-#     # Agreed to ignore adding indexes, SQL will AutoIncrement the entry
-#     payments_df["Payment_ID"] = range(1, len(unique_payment_method) + 1)
-#     payments_df["Payment_Type"] = unique_payment_method
-
-#     return payments_df
-
-
-############################################## MAKING OF CARD TYPES df ###########################################################################################
-
-# unique_card_used = []
-# for item in card_used:
-#     if item not in unique_card_used:
-#         unique_card_used.append(item)
-
-
-# def card_type():
-#     card_type_df = pd.DataFrame()
-#     card_type_df["Card_ID"] = unique_cards_ID
-#     card_type_df["Card_type"] = unique_card_used
-
-#     return card_type_df
-
-# print(card_type_df)
-#####################################################################################################################################
+#############################################################################################################################################
 
 
 # Environment Variables
@@ -243,21 +201,8 @@ engine = create_connection(system="postgresql", user_name=user, password=passwor
 
 cleaned_product_df = product_table()
 order_table_df = order_table()
-# payments_df = payments_type()
 order_product_df = order_product_table()
-#card_type_df = card_type()
-# print(order_product_df.tail())
-# print(cleaned_product_df.head())
-# card_type()
-# payments_type()
 
-# LOAD
-# pandas_to_sql(cleaned_product_df, "products", engine,
-#               if_exists="append")
-# pandas_to_sql(order_table_df, "orders", engine, if_exists="append")
-# pandas_to_sql(payments_df, "payment", engine, if_exists="append")
-# pandas_to_sql(order_product_df, "order_product", engine, if_exists="append")
-# pandas_to_sql(card_type_df, 'card_type', engine, if_exists="append")
 
 products_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
     cleaned_product_df, "products")
@@ -270,11 +215,3 @@ order_product_insert_commands = SQL_INSERT_STATEMENT_FROM_DATAFRAME(
 SQL_commands_executor(products_insert_commands)
 SQL_commands_executor(orders_insert_commands)
 SQL_commands_executor(order_product_insert_commands)
-
-# cleaned_product_df_dict = dict(cleaned_product_df.to_dict())
-# order_table_df_dict = dict(order_table_df.to_dict())
-# payments_df_dict = dict(payments_df.to_dict())
-# order_product_df_dict = dict(order_product_df.to_dict())
-# card_type_df_dict = dict(card_type_df.to_dict())
-
-# print(cleaned_product_df_dict)

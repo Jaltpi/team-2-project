@@ -11,6 +11,14 @@ provider:
   runtime: python3.8
   lambdaHashingVersion: 20201221
 
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    slim: true
+    layer: true
+
 functions:
   hello:
     handler: handler.hello

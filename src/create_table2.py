@@ -1,5 +1,8 @@
-import psycopg2
 from config import config
+import psycopg2
+import boto3
+
+client = boto3.client('redshift')
 
 
 def create_database(user, password, host, port):
@@ -52,6 +55,7 @@ def create_tables():
         )
         """)
     conn = None
+
     try:
         # read the connection parameters
         params = config()
@@ -77,6 +81,7 @@ db = config()
 host = db["host"]
 user = db["user"]
 password = db["password"]
+
 
 create_database(host=host, user=user, password=password, port="5432")
 create_tables()
