@@ -26,7 +26,6 @@ jobs:
         with:
           python-version: "3.8"
           architecture: "x64"
-      - run: python my_script.py
 
       - name: serverless-team-2
         uses: serverless/github-action@master
