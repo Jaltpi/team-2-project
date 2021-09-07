@@ -15,6 +15,7 @@ plugins:
   - serverless-python-requirements
 custom:
   pythonRequirements:
+    pythonBin: python3
     slim: true
     layer: true
 
