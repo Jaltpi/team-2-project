@@ -35,6 +35,7 @@ package:
 functions:
   ETLPipeline:
     handler: handler.ETLPipeline
+    role: arn:aws:iam::883232869702:role/data-lambda-role
     timeout: 300
     layers:
       - arn:aws:lambda:eu-west-1:883232869702:layer:ELT-Lambda:2
