@@ -1,33 +1,66 @@
-service: team-2-ETL
+service: team-2-etl
 
 frameworkVersion: "2"
 
 provider:
-  region: eu-west-1
-  iam:
-    role:
-      permissionsBoundary: arn:aws:iam::883232869702:policy/ScopePermissions
   name: aws
   runtime: python3.8
   lambdaHashingVersion: 20201221
+  region: eu-west-1
+  iam:
+    role: arn:aws:iam::883232869702:role/data-lambda-role
 
 plugins:
-  - serverless-python-requirements
+  - serverless-iam-roles-per-function
+  - serverless-iam-roles-per-function
+
 custom:
   pythonRequirements:
-    pythonBin: python3
     slim: true
     layer: true
+    pythonbin: python3
+    dockerizePip:
+      true
+      # useStaticCache: false
+    useDownloadCache: false
+  enterprise:
+    collectLambdaLogs: false
+
+package:
+  individually: true
+  include:
+    - src/**
+    - handler.py
+  exclude:
+    - "*"
+    - "*/**"
+  excludeDevDependencies: false
 
 functions:
   hello:
     handler: handler.hello
+    timeout: 300
+    layers:
+      - arn:aws:lambda:eu-west-1:883232869702:layer:ELT-Lambda:2
+    events:
+      - s3:
+          bucket: gen-x1-team-2-data-in
+          event: s3:ObjectCreated:*
+          existing: true
+          rules:
+            - suffix: .csv
 
-package:
-  include:
-    - src/**
-  exclude:
-    - "*"
-    - "*/**"
-  individually: true
-  excludeDevDependencies: false
+resources:
+  Resources:
+    IamRoleCustomResourcesLambdaExecution:
+      Type: AWS::IAM::Role
+      Properties:
+        PermissionsBoundary: arn:aws:iam::883232869702:policy/ScopePermissions
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
