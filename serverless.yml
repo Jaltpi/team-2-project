@@ -8,7 +8,8 @@ provider:
   lambdaHashingVersion: 20201221
   region: eu-west-1
   iam:
-    role: arn:aws:iam::883232869702:role/data-lambda-role
+    role:
+      permissionsBoundary: arn:aws:iam::883232869702:policy/ScopePermissions
   vpc:
     securityGroupIds:
       - sg-0801321c71a7a6e23
@@ -16,7 +17,7 @@ provider:
       - subnet-004b25850753cd6e2
       - subnet-0ee5935030b8a9e95
       - subnet-012a9e4b86ac75aa9
-      
+
 plugins:
   - serverless-python-requirements
 
@@ -28,7 +29,6 @@ custom:
     useDownloadCache: false
   enterprise:
     collectLambdaLogs: false
-
 
 package:
   individually: true
@@ -54,8 +54,6 @@ functions:
           existing: true
           rules:
             - suffix: .csv
-
-    
 
 resources:
   Resources:
