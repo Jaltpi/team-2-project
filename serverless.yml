@@ -37,8 +37,8 @@ package:
   excludeDevDependencies: false
 
 functions:
-  hello:
-    handler: handler.hello
+  ETLPipeline:
+    handler: handler.ETLPipeline
     timeout: 300
     layers:
       - arn:aws:lambda:eu-west-1:883232869702:layer:ELT-Lambda:2
