@@ -11,15 +11,15 @@ provider:
     role:
       permissionsBoundary: arn:aws:iam::883232869702:policy/ScopePermissions
 
-plugins:
-  - serverless-python-requirements
+# plugins:
+#   - serverless-python-requirements
 
 custom:
-  pythonRequirements:
-    slim: true
-    layer: true
-    pythonbin: python3
-    useDownloadCache: false
+  # pythonRequirements:
+  #   slim: true
+  #   layer: true
+  #   pythonbin: python3
+  #   useDownloadCache: false
   enterprise:
     collectLambdaLogs: false
 
