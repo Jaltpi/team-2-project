@@ -11,15 +11,15 @@ provider:
     role:
       permissionsBoundary: arn:aws:iam::883232869702:policy/ScopePermissions
 
-# plugins:
-#   - serverless-python-requirements
+plugins:
+  - serverless-python-requirements
 
 custom:
-  # pythonRequirements:
-  #   slim: true
-  #   layer: true
-  #   pythonbin: python3
-  #   useDownloadCache: false
+  pythonRequirements:
+    slim: true
+    layer: true
+    pythonbin: python3
+    useDownloadCache: false
   enterprise:
     collectLambdaLogs: false
 
@@ -45,6 +45,8 @@ functions:
     handler: handler.ETLPipeline
     role: arn:aws:iam::883232869702:role/data-lambda-role
     timeout: 300
+    layers:
+      - !Ref PythonRequirementsLambdaLayer
     events:
       - s3:
           bucket: gen-x1-team-2-data-in
