@@ -33,6 +33,13 @@ package:
     - "*/**"
   excludeDevDependencies: false
 
+resources:
+  Resources:
+    IamRoleCustomResourcesLambdaExecution:
+      Type: AWS::IAM::Role
+      Properties:
+        PermissionsBoundary: arn:aws:iam::883232869702:policy/ScopePermissions
+
 functions:
   ETLPipeline:
     handler: handler.ETLPipeline
@@ -52,10 +59,3 @@ functions:
         - subnet-004b25850753cd6e2
         - subnet-0ee5935030b8a9e95
         - subnet-012a9e4b86ac75aa9
-
-resources:
-  Resources:
-    IamRoleCustomResourcesLambdaExecution:
-      Type: AWS::IAM::Role
-      Properties:
-        PermissionsBoundary: arn:aws:iam::883232869702:policy/ScopePermissions
