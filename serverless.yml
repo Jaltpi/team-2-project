@@ -12,16 +12,12 @@ provider:
 
 plugins:
   - serverless-python-requirements
-  - serverless-iam-roles-per-function
 
 custom:
   pythonRequirements:
     slim: true
     layer: true
     pythonbin: python3
-    dockerizePip:
-      true
-      # useStaticCache: false
     useDownloadCache: false
   enterprise:
     collectLambdaLogs: false
