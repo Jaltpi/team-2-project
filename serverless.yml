@@ -11,8 +11,8 @@ provider:
     role: arn:aws:iam::883232869702:role/data-lambda-role
 
 plugins:
-  - serverless-iam-roles-per-function
-  - serverless-iam-roles-per-function
+  - serverless-python-requirements
+  #- serverless-iam-roles-per-function
 
 custom:
   pythonRequirements:
