@@ -1,7 +1,24 @@
 import json
+import pandas as pd
+import io
+import boto3
+import csv
 
+def extract_file(pandas_library : object) -> object:
+    column = ["datetime", "location", "name", "products",
+            'total_price', "payment_type", "card_number"]
+    
+    # Get key and bucket information
+    key = event['Records'][0]['s3']['object']['key']
+    bucket = event['Records'][0]['s3']['bucket']['name']
+            
+            
+    s3 = boto3.client('s3')
+    obj = s3.get_object(Bucket= bucket, Key= key)
+    raw_df = pd.read_csv(io.BytesIO(obj['Body'].read()), names = column)
+    return raw_df
 
-def hello(event, context):
+def ETLPipeline(event, context):
     body = {
         "message": "Go Serverless v2.0! Your function executed successfully!",
         "input": event,
