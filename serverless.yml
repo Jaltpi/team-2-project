@@ -42,11 +42,13 @@ resources:
 
 functions:
   ETLPipeline:
-    handler: handler.ETLPipeline
+    handler: src/team-2-ETL/handler.ETLPipeline
     role: arn:aws:iam::883232869702:role/data-lambda-role
     timeout: 300
     layers:
-      - !Ref PythonRequirementsLambdaLayer
+      - arn:aws:lambda:eu-west-1:770693421928:layer:Klayers-python38-pandas:38 # Pandas
+      - arn:aws:lambda:eu-west-1:770693421928:layer:Klayers-python38-aws-psycopg2:1 # Psycopg2
+      - arn:aws:lambda:eu-west-1:770693421928:layer:Klayers-python38-boto3:90 #  Boto3
     events:
       - s3:
           bucket: gen-x1-team-2-data-in
