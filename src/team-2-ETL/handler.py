@@ -3,10 +3,10 @@ from logging import exception
 import pandas as pd
 import io
 import boto3
-from Extract import query_db_for_location_tuples, query_db_for_product_tuples, query_latest_entries
-from transform import get_location_ID, get_order_tuples, transform_data, zipped_items_into_list
-from transform import new_products_to_load, create_basket_tuples
-from Load import load_data_redshift
+from src.Extract import query_db_for_location_tuples, query_db_for_product_tuples, query_latest_entries
+from src.transform import get_location_ID, get_order_tuples, transform_data, zipped_items_into_list
+from src.transform import new_products_to_load, create_basket_tuples
+from src.Load import load_data_redshift
 
 # def extract_file() -> object:
 #     column = ["datetime", "location", "name", "products",
