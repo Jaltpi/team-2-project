@@ -87,11 +87,11 @@ import boto3
 #     finally:
 #         if conn is not None:
 #             conn.close()
-def load_data_redshift(table: str, columns: str, Items: list):
+def load_data_redshift(table: str, columns: str, data: str, Items: list):
     """This function connects to the the redshift database and inserts a list of tuples if the connection was successful.
     User must provide the table name (string), and which columns (string without parenthesis enclosing the column names)
     to insert the data into"""
-    try:
+    try: 
         client = boto3.client('redshift', region_name='eu-west-1')
         REDSHIFT_USER = "awsuser"
         REDSHIFT_CLUSTER = "redshiftcluster-fbtitpjkbelw"
@@ -118,7 +118,7 @@ def load_data_redshift(table: str, columns: str, Items: list):
         cursor = conn.cursor()
         
         # Insert Data into table
-        cursor.executemany(f"""INSERT INTO {table} VALUES ({columns})""", Items)
+        cursor.executemany(f"""INSERT INTO {table} ({columns}) VALUES ({data})""", Items)
         print("Command executed successfully.")
         conn.commit()
         conn.close()
