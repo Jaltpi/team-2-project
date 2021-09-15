@@ -118,7 +118,10 @@ def load_data_redshift(table: str, columns: str, data: str, Items: list):
         cursor = conn.cursor()
         
         # Insert Data into table
-        cursor.executemany(f"""INSERT INTO {table} ({columns}) VALUES ({data})""", (Items))
+        for item in Items:
+            cursor.execute(f"""INSERT INTO {table} ({columns}) VALUES ({data}) """, item)
+            
+        #cursor.executemany(f"""INSERT INTO {table} ({columns}) VALUES ({data})""", (Items))
         print("Command executed successfully.")
         conn.commit()
         conn.close()
