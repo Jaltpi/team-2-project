@@ -39,14 +39,14 @@ raw_products = raw_df["products"]
 zipped_products = transform_data(raw_products)
 cleaned_products = zipped_items_into_list(zipped_products)
 products_to_load = new_products_to_load(products_from_db, cleaned_products)
-load_data_redshift("products", "product_size, product_name, product_price", "?,?,?",products_to_load)
+load_data_redshift("products", "product_size, product_name, product_price", "%s,%s,%s",products_to_load)
 
 # - Clean Orders data
 # - Load Orders into Database
 
 zipped_order_tuples = get_order_tuples(raw_df, cleaned_location_id_df)
 cleaned_orders = zipped_items_into_list(zipped_order_tuples)
-load_data_redshift("orders", "date, time, location_id, total_price, payment_type", "?,?,?,?,?", cleaned_orders)
+load_data_redshift("orders", "date, time, location_id, total_price, payment_type", "%s,%s,%s,%s,%s", cleaned_orders)
 
 # - query database for updated products
 # - query database for latest entries in orders
@@ -57,4 +57,4 @@ products_with_ids = query_db_for_product_tuples()
 orders_with_ids = query_latest_entries("Customer_ID, location_id, total_price, payment_type", len(raw_df), "Orders", "Customer_ID")
 zipped_basket = create_basket_tuples(products_with_ids, orders_with_ids, raw_df)
 cleaned_basket = zipped_items_into_list(zipped_basket)
-load_data_redshift("Basket", "customer_id, product_id, quantity", "?,?,?", cleaned_basket)
+load_data_redshift("Basket", "customer_id, product_id, quantity", "%s,%s,%s", cleaned_basket)
