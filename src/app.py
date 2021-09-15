@@ -55,6 +55,6 @@ load_data_redshift("orders", "date, time, location_id, total_price, payment_type
 
 products_with_ids = query_db_for_product_tuples()
 orders_with_ids = query_latest_entries("Customer_ID, location_id, total_price, payment_type", len(raw_df), "Orders", "Customer_ID")
-zipped_basket = create_basket_tuples(products_with_ids, orders_with_ids, raw_df)
+zipped_basket = create_basket_tuples(products_with_ids, orders_with_ids, raw_products)
 cleaned_basket = zipped_items_into_list(zipped_basket)
 load_data_redshift("Basket", "customer_id, product_id, quantity", "%s,%s,%s", cleaned_basket)
