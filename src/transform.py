@@ -283,12 +283,12 @@ def get_order_tuples(raw_df : object, cleaned_location_id_df: object) -> list:
     
     return zipped_order_tuples
 
-def create_basket_tuples(product_with_ids : list, order_with_ids : list, raw_df : object) -> list:
+def create_basket_tuples(product_with_ids : list, order_with_ids : list, raw_products : list) -> list:
     """This function takes in 2 list containing tuples and a Pandas dataframe. It unpacks the tuples, creates a new dataframe,
     and returns zipped list from the merged dataframe"""
     product_ids, product_sizes, product_names, product_prices = zip(*product_with_ids)
     order_ids, order_location, order_price, order_payment_type = zip(*order_with_ids)
-    raw_product_tuples = transform_data(raw_df)
+    raw_product_tuples = transform_data(raw_products)
     raw_product_sizes, raw_product_names, raw_product_prices = zip(*raw_product_tuples)
     temp_df = pd.DataFrame()
     temp_df["Customer_ID"] = order_ids
