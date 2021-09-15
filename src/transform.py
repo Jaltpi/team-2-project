@@ -294,7 +294,7 @@ def create_basket_tuples(product_with_ids : list, order_with_ids : list, raw_pro
     temp_df["Customer_ID"] = order_ids
     temp_df["product_size"] = raw_product_sizes
     temp_df["product_name"] = raw_product_names
-    temp_df["product_price"] = raw_product_sizes
+    temp_df["product_price"] = raw_product_prices
     product_df = pd.DataFrame()
     product_df["product_ids"] = product_ids
     product_df["product_sizes"] = product_sizes
