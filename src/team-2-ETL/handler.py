@@ -184,7 +184,7 @@ def ETLPipeline(event, context):
         basket_df["product_id"] = temp_basket_df["product_id"]
 
         # Get recent Orders
-        recent_orders_from_db = query_latest_entries("*", len(orders_df),"orders","orders_id")
+        recent_orders_from_db = query_latest_entries("*", len(orders_df),"orders","order_id")
         recent_orders_df = pd.DataFrame(recent_orders_from_db, columns=["order_id","date","time","location_id", "customer_id", "price", "payment"])
 
         basket_df = basket_df.merge(recent_orders_df, on = ["customer_id"], how="left")
