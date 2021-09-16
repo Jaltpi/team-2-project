@@ -362,7 +362,7 @@ def get_customer_id(raw_customers: object, customer_id_keys: list, customer_id_v
 def zip_from_df_orders(orders_df: object):
     "This function takes in the orders dataframe and returns a zipped list of tuples containing the data"
     zipped_orders = zip(orders_df["date"].to_list(),orders_df["time"].to_list(),orders_df["location_id"].to_list(),\
-        orders_df["customer_id".to_list()],orders_df["price"].to_list(),orders_df["payment"].to_list())
+        orders_df["customer_id"].to_list(),orders_df["price"].to_list(),orders_df["payment"].to_list())
 
     return zipped_orders
 
