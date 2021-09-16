@@ -309,3 +309,65 @@ def create_basket_tuples(product_with_ids : list, order_with_ids : list, raw_pro
     basket_product_ID = list(temp_df["product_ids"])
     basket_quantity= list(temp_df["quantity"])
     return zip(basket_Customer_ID, basket_product_ID, basket_quantity)
+
+def splitDataFrameList(df,target_column,separator):
+    ''' df = dataframe to split,
+    target_column = the column containing the values to split
+    separator = the symbol used to perform the split
+    returns: a dataframe with each entry for the target column separated, with each element moved into a new row. 
+    The values in the other columns are duplicated across the newly divided rows.
+    '''
+    def splitListToRows(row,row_accumulator,target_column,separator):
+        split_row = row[target_column].split(separator)
+        for s in split_row:
+            new_row = row.to_dict()
+            new_row[target_column] = s
+            row_accumulator.append(new_row)
+    new_rows = []
+    df.apply(splitListToRows,axis=1,args = (new_rows,target_column,separator))
+    new_df = pd.DataFrame(new_rows)
+    return new_df
+
+def create_customer_id(raw_customers: object):
+    """This function Takes in a series of customer names, adds them to a list and counts how many new names
+    were added (ID of name). It returns a zipped list of tuples for ID and names"""
+    names = []
+    id = []
+    
+    count = 0
+    for customer in raw_customers:
+        if customer not in names:
+            count += 1
+        elif customer in names:
+            continue
+        names.append(customer)
+        id.append(count)
+        
+    return zip(id, names)
+
+def get_customer_id(raw_customers: object, customer_id_keys: list, customer_id_values: list):
+    """This function takes in a Series of customer, a list of Keys from a dictionary and a 
+    list of values from the dictionary. It loops through the names replacing of the series finding the
+    appropriate ID number for the name and appends that to a list. The function then returns the list of
+    customer_id's"""
+    
+    customer_id = []
+    
+    for item in raw_customers:
+        position = customer_id_values.index(item) # Get index of item
+        id_number = customer_id_keys[position] # Get key value of item
+        customer_id.append(id_number)
+    return customer_id
+
+def zip_from_df_orders(orders_df: object):
+    "This function takes in the orders dataframe and returns a zipped list of tuples containing the data"
+    zipped_orders = zip({orders_df}["date"].to_list(),{orders_df}["time"].to_list(),{orders_df}["location_id"].to_list(),\
+        {orders_df}["customer_id".to_list()],{orders_df}["price"].to_list(),{orders_df}["payment"].to_list())
+
+    return zipped_orders
+
+def zip_from_basket_df(cleaned_basket_df: object):
+    """This function take in the cleaned basket data frame and returns a zipped list of tuples containing the data"""
+    zipped_basket = zip({cleaned_basket_df}["order_id"].to_list(),{cleaned_basket_df}["customer_id"].to_list(),\
+        {cleaned_basket_df}["product_id"].to_list())
+    return zipped_basket
