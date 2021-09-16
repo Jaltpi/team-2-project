@@ -189,7 +189,7 @@ def ETLPipeline(event, context):
 
         basket_df = basket_df.merge(recent_orders_df, on = ["customer_id"], how="left")
         cleaned_basket_df = pd.DataFrame()
-        cleaned_basket_df["order_id"] = basket_df["orders_id"]
+        cleaned_basket_df["order_id"] = basket_df["order_id"]
         cleaned_basket_df["customer_id"] = basket_df["customer_id"]
         cleaned_basket_df["product_id"] = basket_df["product_id"]
         zipped_basket = zip_from_basket_df(cleaned_basket_df)
