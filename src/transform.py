@@ -42,19 +42,19 @@ def transform_data(data: list):
     
     return zip(product_size, product_name, product_price)
 
-def new_products_to_load(db_product_tuples: list, cleaned_products: list):
+def new_items_to_load(db_items: list, csv_items: list):
     """This Function takes in two list of tuples, and returns a list of tuples containing the different items."""
-    current_db_products = []
-    new_products = []
-    for item in db_product_tuples:
+    current_db_items = []
+    new_items = []
+    for item in db_items:
         product_list = list(item)
         removed_id_from_product = tuple(product_list[1:]) 
-        current_db_products.append(removed_id_from_product)
+        current_db_items.append(removed_id_from_product)
     
-    for item in cleaned_products:
-        if item not in current_db_products:
-            new_products.append(item)
-    return list(set(new_products))
+    for item in csv_items:
+        if item not in current_db_items:
+            new_items.append(item)
+    return list(set(new_items))
 
 def splitDataFrameList(df,target_column,separator):
     ''' df = dataframe to split,
