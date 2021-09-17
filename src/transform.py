@@ -117,3 +117,18 @@ def zip_from_basket_df(cleaned_basket_df: object):
     zipped_basket = zip(cleaned_basket_df["order_id"].to_list(),cleaned_basket_df["customer_id"].to_list(),\
         cleaned_basket_df["product_id"].to_list())
     return zipped_basket
+
+def new_locations_to_load(db_items: list, csv_items: list):
+    """This Function takes in two list of tuples, and returns a list of tuples containing the different items."""
+    current_db_items = []
+    new_items = []
+    for item in db_items:
+        location_list = list(item)
+        removed_id_from_location = (location_list[1]) 
+        print(removed_id_from_location)
+        current_db_items.append(removed_id_from_location)
+    
+    for item in csv_items:
+        if item not in current_db_items:
+            new_items.append(item)
+    return zip(set(new_items))
