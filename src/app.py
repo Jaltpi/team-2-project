@@ -1,6 +1,6 @@
 from src.Extract import query_db_for_location_tuples, query_db_for_product_tuples, query_latest_entries
 from src.transform import get_location_ID, transform_data, zipped_items_into_list
-from src.transform import new_items_to_load
+from src.transform import new_items_to_load, new_locations_to_load
 from src.transform import splitDataFrameList, create_customer_id,get_customer_id, zip_from_df_orders, zip_from_basket_df
 from src.Load import load_data_redshift
 import pandas as pd
@@ -32,8 +32,9 @@ def etl(df: object):
     # CLEAN LOCATIONS:
     csv_locations = [i for i in raw_locations]
     database_location_id_tuple = query_db_for_location_tuples()
-    new_locations_for_db = new_items_to_load(database_location_id_tuple, csv_locations)
-    load_data_redshift("locations", "location_name", "%s", new_locations_for_db)
+    new_locations_for_db = new_locations_to_load(database_location_id_tuple, csv_locations)
+    cleaned_locations_for_db = zipped_items_into_list(new_locations_for_db)
+    load_data_redshift("locations", "location_name", "%s", cleaned_locations_for_db)
     database_location_id_tuple = query_db_for_location_tuples()
     dict_database_id = dict(database_location_id_tuple)
     database_id_keys = list(dict_database_id.keys()) # Create a list of keys
