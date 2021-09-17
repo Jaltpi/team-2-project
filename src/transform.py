@@ -125,7 +125,6 @@ def new_locations_to_load(db_items: list, csv_items: list):
     for item in db_items:
         location_list = list(item)
         removed_id_from_location = (location_list[1]) 
-        print(removed_id_from_location)
         current_db_items.append(removed_id_from_location)
     
     for item in csv_items:
