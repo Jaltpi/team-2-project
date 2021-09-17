@@ -1,6 +1,6 @@
 from src.Extract import query_db_for_location_tuples, query_db_for_product_tuples, query_latest_entries
 from src.transform import get_location_ID, transform_data, zipped_items_into_list
-from src.transform import new_products_to_load
+from src.transform import new_items_to_load
 from src.transform import splitDataFrameList, create_customer_id,get_customer_id, zip_from_df_orders, zip_from_basket_df
 from src.Load import load_data_redshift
 import pandas as pd
@@ -27,8 +27,13 @@ def etl(df: object):
 
     # Use transform function on this
     raw_products = df["Order"]
+    
 
     # CLEAN LOCATIONS:
+    csv_locations = [i for i in raw_locations]
+    database_location_id_tuple = query_db_for_location_tuples()
+    new_locations_for_db = new_items_to_load(database_location_id_tuple, csv_locations)
+    load_data_redshift("locations", "location_name", "%s", new_locations_for_db)
     database_location_id_tuple = query_db_for_location_tuples()
     dict_database_id = dict(database_location_id_tuple)
     database_id_keys = list(dict_database_id.keys()) # Create a list of keys
@@ -39,7 +44,7 @@ def etl(df: object):
     database_products_id_tuple = query_db_for_product_tuples()
     current_zipped_products_from_csv = transform_data(raw_products)
     all_current_cleaned_products_from_csv = zipped_items_into_list(current_zipped_products_from_csv)
-    new_products_for_db = new_products_to_load(database_products_id_tuple, all_current_cleaned_products_from_csv) # compare db products and csv products
+    new_products_for_db = new_items_to_load(database_products_id_tuple, all_current_cleaned_products_from_csv) # compare db products and csv products
     load_data_redshift("products", "product_size,product_name,product_price", "%s,%s,%s", new_products_for_db)
 
     #Use below to make database_products_df
